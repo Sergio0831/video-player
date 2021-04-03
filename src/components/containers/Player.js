@@ -26,16 +26,21 @@ const themeLight = {
 
 const Player = ({ match, history, location }) => {
   const videos = JSON.parse(document.querySelector('[name="videos"]').value);
+  const savedState = JSON.parse(localStorage.getItem(`${videos.playlistId}`));
 
   console.log(videos);
 
   const [state, setState] = useState({
-    videos: videos.playlist,
-    activeVideo: videos.playlist[0],
-    nightMode: true,
-    playlistId: videos.playlistId,
+    videos: savedState ? savedState.videos : videos.playlist,
+    activeVideo: savedState ? savedState.activeVideo : videos.playlist[0],
+    nightMode: savedState ? savedState.nightMode : true,
+    playlistId: savedState ? savedState.playlistId : videos.playlistId,
     autoplay: false
   });
+
+  useEffect(() => {
+    localStorage.setItem(`$(state.playlistId)`, JSON.stringify({ ...state }));
+  }, [state]);
 
   useEffect(() => {
     const videoId = match.params.activeVideo;
