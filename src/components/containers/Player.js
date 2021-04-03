@@ -24,8 +24,10 @@ const themeLight = {
   color: "#353535"
 };
 
-const Player = (props) => {
+const Player = ({ match, history, location }) => {
   const videos = JSON.parse(document.querySelector('[name="videos"]').value);
+
+  console.log(videos);
 
   const [state, setState] = useState({
     videos: videos.playlist,
@@ -35,11 +37,75 @@ const Player = (props) => {
     autoplay: false
   });
 
-  const nightModeCallback = () => {};
+  useEffect(() => {
+    const videoId = match.params.activeVideo;
 
-  const endCallback = () => {};
+    if (videoId !== undefined) {
+      const newActiveVideo = state.videos.findIndex(
+        (video) => video.id === videoId
+      );
+      setState((prev) => ({
+        ...prev,
+        activeVideo: prev.videos[newActiveVideo],
+        autoplay: location.autoplay
+      }));
+    } else {
+      history.push({
+        pathname: `/${state.activeVideo.id}`,
+        autoplay: false
+      });
+    }
+  }, [
+    history,
+    location.autoplay,
+    match.params.activeVideo,
+    state.activeVideo,
+    state.activeVideo.id,
+    state.videos
+  ]);
 
-  const progressCallback = () => {};
+  const nightModeCallback = () => {
+    setState((prevState) => ({
+      ...prevState,
+      nightMode: !prevState.nightMode
+    }));
+  };
+
+  const endCallback = (props) => {
+    const videoId = props.match.params.activeVideo;
+    const currentVideoIndex = state.videos.findIndex(
+      (video) => video.id === videoId
+    );
+
+    const nextVideo =
+      currentVideoIndex === state.videos.length - 1 ? 0 : currentVideoIndex + 1;
+
+    props.history.push({
+      pathname: `${state.videos[nextVideo].id}`,
+      autoplay: false
+    });
+  };
+
+  const progressCallback = (e) => {
+    if (e.playedSeconds > 10 && e.playedSeconds < 11) {
+      // const videos = { ...state.videos };
+      // const playedVideo = videos.find(
+      //   (video) => video.id === state.activeVideo.id
+      // );
+
+      // playedVideo.played = true;
+      // setState((prevState) => ({ ...prevState, videos }));
+
+      setState({
+        ...state,
+        videos: state.videos.map((video) => {
+          return video.id === state.activeVideo.id
+            ? { ...video, played: true }
+            : video;
+        })
+      });
+    }
+  };
 
   return (
     <ThemeProvider theme={state.nightMode ? theme : themeLight}>

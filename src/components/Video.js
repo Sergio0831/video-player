@@ -7,6 +7,7 @@ const Video = ({ active, autoplay, endCallback, progressCallback }) => (
   <StyledVideo>
     <StyledVideoWrapper>
       <ReactPlayer
+        controls
         width='100%'
         height='100%'
         style={{ position: "absolute", top: "0" }}
